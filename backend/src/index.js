@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import appRoutes from "./routes/auth.route.js";
 import { connectDB } from "./lib/db.js";
+import cookieParser from "cookie-parser";
 dotenv.config();
 
 const PORT = process.env.PORT;
@@ -9,8 +10,11 @@ const PORT = process.env.PORT;
 const app = express();
 
 app.use(express.json()); // for parsing application/json
+app.use(cookieParser());// allow to parse cookies in middleware
 
 app.use("/api/auth", appRoutes);
+
+
 
 app.listen(PORT, () => {
   console.log("Server is running on port:" + PORT);

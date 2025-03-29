@@ -192,8 +192,7 @@ Follow these steps to set up and run the project locally:
 
 ## Acknowledgment
 
-Credit to the [As a Programmer](https://www.youtube.com/watch?v=ntKkVrQqBYY) YouTube channel for the project inspiration  
-and guidance.
+Credit to the [As a Programmer](https://www.youtube.com/watch?v=ntKkVrQqBYY) YouTube channel for the project inspiration and guidance.
 
 ## Contributing
 

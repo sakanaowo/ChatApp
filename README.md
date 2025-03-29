@@ -1,7 +1,6 @@
 # MERN Stack Project: Real-Time Chat App
 
-Welcome to the **Real-Time Chat App**, a full-stack application built using the MERN (MongoDB, Express.js, React.js,  
-Node.js) stack, featuring real-time communication powered by **Socket.IO**.
+Welcome to the **Real-Time Chat App**, a full-stack application built using the MERN (MongoDB, Express.js, React.js, Node.js) stack, featuring real-time communication powered by **Socket.IO**.
 
 ## Features
 
@@ -90,12 +89,12 @@ Follow these steps to set up and run the project locally:
 
 # Frontend Build Tools
 
-vite==6.2.0  
-postcss==8.5.3  
-autoprefixer==10.4.21  
-@tailwindcss/vite==4.0.15
+	vite==6.2.0  
+	postcss==8.5.3  
+	autoprefixer==10.4.21  
+	@tailwindcss/vite==4.0.15  
 
-   ```  
+```  
 4. **Run the development server:**  
   
    Use **nodemon** (or **npm start**) for the backend and **vite** for the frontend:  
@@ -108,6 +107,69 @@ autoprefixer==10.4.21
    Open your browser and navigate to `http://localhost:5173`.
 
 ## Project Structure
+```
+.
+├── backend
+│   ├── package.json
+│   ├── package-lock.json
+│   └── src
+│       ├── controllers
+│       │   ├── auth.controller.js
+│       │   └── message.controller.js
+│       ├── index.js
+│       ├── lib
+│       │   ├── cloudinary.js
+│       │   ├── db.js
+│       │   ├── socket.js
+│       │   └── utils.js
+│       ├── middleware
+│       │   └── auth.middleware.js
+│       ├── models
+│       │   ├── message.model.js
+│       │   └── user.model.js
+│       └── routes
+│           ├── auth.route.js
+│           └── message.route.js
+└── frontend
+    ├── eslint.config.js
+    ├── index.html
+    ├── package.json
+    ├── package-lock.json
+    ├── public
+    │   ├── avatar.png
+    │   └── vite.svg
+    ├── src
+    │   ├── App.jsx
+    │   ├── components
+    │   │   ├── AuthImagePattern.jsx
+    │   │   ├── ChatContainer.jsx
+    │   │   ├── ChatHeader.jsx
+    │   │   ├── MessageInput.jsx
+    │   │   ├── Navbar.jsx
+    │   │   ├── NoChatSelected.jsx
+    │   │   ├── Sidebar.jsx
+    │   │   └── skeletons
+    │   │       ├── MessageSkeleton.jsx
+    │   │       └── SidebarSkeleton.jsx
+    │   ├── constants
+    │   │   └── index.js
+    │   ├── index.css
+    │   ├── lib
+    │   │   ├── axios.js
+    │   │   └── utils.js
+    │   ├── main.jsx
+    │   ├── pages
+    │   │   ├── HomePage.jsx
+    │   │   ├── LoginPage.jsx
+    │   │   ├── ProfilePage.jsx
+    │   │   ├── SettingsPage.jsx
+    │   │   └── SignUpPage.jsx
+    │   └── store
+    │       ├── useAuthStore.js
+    │       ├── useChatStore.js
+    │       └── useThemeStore.js
+    └── vite.config.js
+```
 
 ### Client (Frontend)
 

@@ -60,48 +60,52 @@ Follow these steps to set up and run the project locally:
 
    Navigate to both `backend` and `frontend` directories and install packages:
 
-   ```bash  
-   # Backend Dependencies  
-	express==4.21.2  
-	mongoose==8.12.1  
-	dotenv==16.4.7  
-	jsonwebtoken==9.0.2  
-	bcryptjs==3.0.2  
-	socket.io==4.8.1  
-	cookie-parser==1.4.7  
-	cors==2.8.5  
-	cloudinary==2.6.0  
-	nodemon==3.1.9  
+```bash  
+# Backend Dependencies  
+express==4.21.2  
+mongoose==8.12.1  
+dotenv==16.4.7  
+jsonwebtoken==9.0.2  
+bcryptjs==3.0.2  
+socket.io==4.8.1  
+cookie-parser==1.4.7  
+cors==2.8.5  
+cloudinary==2.6.0  
+nodemon==3.1.9  
 
-# Frontend Dependencies
-
-	react==19.0.0  
-	react-dom==19.0.0  
-	axios==1.8.4  
-	zustand==5.0.3  
-	socket.io-client==4.8.1  
-	tailwindcss==4.0.15  
-	daisyui==5.0.9  
-	react-router-dom==7.4.0  
-	react-hot-toast==2.5.2  
-	lucide-react==0.483.0  
-	@vitejs/plugin-react==4.3.4  
-
-# Frontend Build Tools
-
-	vite==6.2.0  
-	postcss==8.5.3  
-	autoprefixer==10.4.21  
-	@tailwindcss/vite==4.0.15  
-
-```  
-4. **Run the development server:**  
+# Frontend Dependencies  
   
-   Use **nodemon** (or **npm start**) for the backend and **vite** for the frontend:  
+react==19.0.0  
+react-dom==19.0.0  
+axios==1.8.4  
+zustand==5.0.3  
+socket.io-client==4.8.1  
+tailwindcss==4.0.15  
+daisyui==5.0.9  
+react-router-dom==7.4.0  
+react-hot-toast==2.5.2  
+lucide-react==0.483.0  
+@vitejs/plugin-react==4.3.4  
+  
+# Frontend Build Tools  
+  
+vite==6.2.0  
+postcss==8.5.3  
+autoprefixer==10.4.21  
+@tailwindcss/vite==4.0.15  
+```  
+
+4. **Run the development server:**
+
+   Use **nodemon** (or **npm start**) for the backend and **vite** for the frontend:
 ```bash   
-   # Start the backend   cd backend   npm run dev  
-   # Start the frontend   cd frontend   npm run dev   
-   ```  
+   # Start the backend   
+   cd backend   
+   npm run dev  
+   # Start the frontend   
+   cd frontend   
+   npm run dev   
+```  
 5. **Access the app:**
 
    Open your browser and navigate to `http://localhost:5173`.

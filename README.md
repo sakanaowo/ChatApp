@@ -42,13 +42,15 @@ Ensure you have the following installed on your system:
 Follow these steps to set up and run the project locally:
 
 1. **Clone this repository:**
-  ```bash  
-   git clone https://github.com/sakanaowo/ChatApp   cd <repository-folder>   
-	```
-2. **Set up environment variables:**  
-  
-   Create a `.env` file in the root directory of the project and configure the following variables:  
-  
+   ```bash
+   git clone https://github.com/sakanaowo/ChatApp   
+   cd <repository-folder>  
+   ```
+
+2. **Set up environment variables:**
+
+   Create a `.env` file in the root directory of the project and configure the following variables:
+
    ```env  
    MONGO_URI=<your_mongodb_connection_string>  
    JWT_SECRET=<your_jwt_secret>   
@@ -61,7 +63,7 @@ Follow these steps to set up and run the project locally:
    Navigate to both `backend` and `frontend` directories and install packages:
 
 ```bash  
-	# Backend Dependencies  
+# Backend Dependencies  
 	express==4.21.2  
 	mongoose==8.12.1  
 	dotenv==16.4.7  
@@ -73,8 +75,7 @@ Follow these steps to set up and run the project locally:
 	cloudinary==2.6.0  
 	nodemon==3.1.9  
 	
-	# Frontend Dependencies  
-	  
+# Frontend Dependencies  
 	react==19.0.0  
 	react-dom==19.0.0  
 	axios==1.8.4  
@@ -87,8 +88,7 @@ Follow these steps to set up and run the project locally:
 	lucide-react==0.483.0  
 	@vitejs/plugin-react==4.3.4  
 	  
-	# Frontend Build Tools  
-	  
+# Frontend Build Tools   
 	vite==6.2.0  
 	postcss==8.5.3  
 	autoprefixer==10.4.21  

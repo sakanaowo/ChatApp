@@ -1,0 +1,22 @@
+{
+  "name": "chatapp",
+  "version": "1.0.0",
+  "description": "Welcome to the **Real-Time Chat App**, a full-stack application built using the MERN (MongoDB, Express.js, React.js, Node.js) stack, featuring real-time communication powered by **Socket.IO**.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix backend && npm run build --prefix frontend && npm run build --prefix frontend",
+    "start": "npm run start --prefix backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakanaowo/ChatApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sakanaowo/ChatApp/issues"
+  },
+  "homepage": "https://github.com/sakanaowo/ChatApp#readme"
+}

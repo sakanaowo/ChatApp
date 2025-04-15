@@ -10,6 +10,7 @@ const Sidebar = () => {
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
+
   useEffect(() => {
     getUsers();
   }, [getUsers]);
@@ -26,6 +27,22 @@ const Sidebar = () => {
         <div className="flex items-center gap-2">
           <Users className="size-6" />
           <span className="font-medium hidden lg:block">Contacts</span>
+          {/* Search  */}
+          <div className="relative h-10 w-10 focus-within:w-64 transition-all duration-300 border border-gray-300 rounded-full px-3">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2">
+              <img
+                src="https://img.icons8.com/ios/50/FFFFFF/search--v1.png"
+                alt="search"
+                className="w-4 h-4 opacity-70"
+              />
+            </span>
+            <input
+              type="text"
+              placeholder="Search..."
+              className="absolute inset-0 pl-10 pr-3 h-full w-full bg-transparent outline-none"
+            />
+          </div>
+
         </div>
         {/* TODO: Online filter toggle */}
         <div className="mt-3 hidden lg:flex items-center gap-2">

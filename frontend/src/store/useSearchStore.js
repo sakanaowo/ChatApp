@@ -11,5 +11,7 @@ import { create } from "zustand";
 // }));
 export const useSearchStore = create((set) => ({
     searchTerm: "",
-    setServers: (term) => set({ searchTerm: term }),
+    isSearchFocused: false,
+    setSearchTerm: (term) => set({ searchTerm: term }),
+    setIsSearchFocused: (focused) => set({ isSearchFocused: focused }),
 }));

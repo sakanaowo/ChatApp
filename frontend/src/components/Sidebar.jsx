@@ -4,20 +4,27 @@ import { useAuthStore } from "../store/useAuthStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users } from "lucide-react";
 
+import { useSearchStore } from "../store/useSearchStore";
+
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
 
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
-
+  const { searchTerm, setIsSearchFocused, setSearchTerm } = useSearchStore();
 
   useEffect(() => {
     getUsers();
   }, [getUsers]);
 
-  const filteredUsers = showOnlineOnly
-    ? users.filter((user) => onlineUsers.includes(user._id))
-    : users;
+  // const filteredUsers = showOnlineOnly
+  //   ? users.filter((user) => onlineUsers.includes(user._id))
+  //   : users;
+  const filteredUsers = users.filter((user) => {
+    const isOnline = onlineUsers.includes(user._id);
+    const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+    return (!showOnlineOnly || isOnline) && matchesSearch;
+  });
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -40,11 +47,15 @@ const Sidebar = () => {
               type="text"
               placeholder="Search..."
               className="absolute inset-0 pl-10 pr-3 h-full w-full bg-transparent outline-none"
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchTerm}
             />
           </div>
 
         </div>
-        {/* TODO: Online filter toggle */}
+        {/*Online filter toggle */}
         <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
             <input
@@ -63,7 +74,7 @@ const Sidebar = () => {
         {filteredUsers.map((user) => (
           <button
             key={user._id}
-            onClick={() => setSelectedUser(user)}
+            onClick={() => { setSelectedUser(user); setSearchTerm(""); }}
             className={`
               w-full p-3 flex items-center gap-3
               hover:bg-base-300 transition-colors
@@ -98,7 +109,7 @@ const Sidebar = () => {
           <div className="text-center text-zinc-500 py-4">No online users</div>
         )}
       </div>
-    </aside>
+    </aside >
   );
 };
 export default Sidebar;

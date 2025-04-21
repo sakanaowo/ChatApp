@@ -1,3 +1,5 @@
+// thiếu phương thức addFriend trong useChatStore
+// thiếu thuộc tính isFriend
 const UserCard = ({ user, isFriend, onAddFriend }) => {
   return (
     <div className="p-4 border rounded-lg shadow hover:shadow-lg transition flex flex-col items-center">

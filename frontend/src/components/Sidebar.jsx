@@ -5,9 +5,11 @@ import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users } from "lucide-react";
 
 import { useSearchStore } from "../store/useSearchStore";
+import NavToSuggestions from "./Template/navToSuggestions";
 
 const Sidebar = () => {
-  const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
+  const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } =
+    useChatStore();
 
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
@@ -22,7 +24,9 @@ const Sidebar = () => {
   //   : users;
   const filteredUsers = users.filter((user) => {
     const isOnline = onlineUsers.includes(user._id);
-    const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = user.fullName
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return (!showOnlineOnly || isOnline) && matchesSearch;
   });
 
@@ -53,7 +57,6 @@ const Sidebar = () => {
               value={searchTerm}
             />
           </div>
-
         </div>
         {/*Online filter toggle */}
         <div className="mt-3 hidden lg:flex items-center gap-2">
@@ -66,7 +69,9 @@ const Sidebar = () => {
             />
             <span className="text-sm">Show online only</span>
           </label>
-          <span className="text-xs text-zinc-500">({onlineUsers.length - 1} online)</span>
+          <span className="text-xs text-zinc-500">
+            ({onlineUsers.length - 1} online)
+          </span>
         </div>
       </div>
 
@@ -74,11 +79,18 @@ const Sidebar = () => {
         {filteredUsers.map((user) => (
           <button
             key={user._id}
-            onClick={() => { setSelectedUser(user); setSearchTerm(""); }}
+            onClick={() => {
+              setSelectedUser(user);
+              setSearchTerm("");
+            }}
             className={`
               w-full p-3 flex items-center gap-3
               hover:bg-base-300 transition-colors
-              ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""}
+              ${
+                selectedUser?._id === user._id
+                  ? "bg-base-300 ring-1 ring-base-300"
+                  : ""
+              }
             `}
           >
             <div className="relative mx-auto lg:mx-0">
@@ -109,7 +121,8 @@ const Sidebar = () => {
           <div className="text-center text-zinc-500 py-4">No online users</div>
         )}
       </div>
-    </aside >
+      <NavToSuggestions />
+    </aside>
   );
 };
 export default Sidebar;

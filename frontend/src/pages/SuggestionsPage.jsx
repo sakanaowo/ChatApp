@@ -41,7 +41,7 @@ const SuggestionsPage = () => {
         <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden">
             <div className="w-full p-5">
-              <h1 className="text-2xl font-bold mb-5">Danh sách gợi ý</h1>
+              <h1 className="text-2xl font-bold mb-5">Danh sách người dùng</h1>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
                 {users.map((user) => (
                   <UserCard

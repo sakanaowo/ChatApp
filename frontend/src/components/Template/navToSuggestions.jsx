@@ -7,60 +7,68 @@ const navToSuggestions = () => {
     // <Link to="/suggestions">
     <Link to="/suggestions">
       <StyledWrapper>
-        <button className="boton-elegante">Explore</button>
+        <button className="button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+            />
+          </svg>
+          <div className="text">Explore</div>
+        </button>
       </StyledWrapper>
     </Link>
   );
 };
 
 const StyledWrapper = styled.div`
-  display: flex; /* Đặt flexbox để căn giữa */
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  height: 100%; /* Chiều cao để căn giữa toàn bộ */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 
-  .boton-elegante {
-    padding: 10px 20px;
-    border: 2px solid #e5e7eb; /* Màu viền nhạt */
-    background-color: #f3f4f6; /* Màu nền nhạt */
-    color: #1f2937; /* Màu chữ đậm */
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 25px; /* Bo góc nhẹ */
-    transition: all 0.3s ease;
-    outline: none;
+  .button {
+    background-color: #ffffff00;
+    color: #fff;
+    width: 8.5em;
+    height: 2.9em;
+    border: #ffffff 0.2em solid;
+    border-radius: 11px;
+    text-align: right;
     position: relative;
-    overflow: hidden;
-    font-weight: 500;
-    text-align: center;
-    display: inline-block;
-    width: 70%; /* Để nút chiếm toàn bộ chiều rộng */
+    transition: all 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    cursor: pointer;
   }
 
-  .boton-elegante::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(
-      circle,
-      rgba(16, 185, 129, 0.3) 0%,
-      /* Màu xanh nhạt */ rgba(16, 185, 129, 0) 70%
-    );
-    transform: scale(0);
-    transition: transform 0.4s ease;
+  .button:hover {
+    background-color: #ffffff;
+    color: #000;
   }
 
-  .boton-elegante:hover::after {
-    transform: scale(4);
+  .button svg {
+    width: 1.6em;
+    margin: 0;
+    transition: all 0.6s ease;
   }
 
-  .boton-elegante:hover {
-    border-color: #10b981; /* Màu viền xanh khi hover */
-    background: #d1fae5; /* Màu nền xanh nhạt khi hover */
-    color: #065f46; /* Màu chữ đậm hơn khi hover */
+  .button:hover svg {
+    transform: translateX(5px);
+  }
+
+  .text {
+    margin: 0;
   }
 `;
 

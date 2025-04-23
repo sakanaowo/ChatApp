@@ -7,6 +7,7 @@ import cors from "cors";
 import path from "path";
 import { connectDB } from "./lib/mongodb.js";
 import { sql, poolPromise } from "./lib/sqlserver.js";
+import { sql1, poolPromise1 } from "./lib/sqlserver1.js";
 
 import appRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";

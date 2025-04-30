@@ -1,11 +1,14 @@
+// src/routes/friend.route.js
+
 import express from "express";
-import { addFriend, getFriends, deleteFriend } from "../controllers/friend.controller.js";
+import { checkFriends, deleteFriend } from "../controllers/friend.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/", protectRoute, addFriend); // kết bạn
-router.get("/", protectRoute, getFriends); // lấy danh sách bạn
-router.delete("/:userId2", protectRoute, deleteFriend); // hủy kết bạn
+// Lấy danh sách bạn bè (gọi hàm checkFriends)
+router.get("/:email", checkFriends);
 
+// Xóa bạn bè
+router.put("/delete", deleteFriend);
 export default router;

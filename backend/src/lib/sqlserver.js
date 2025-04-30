@@ -7,7 +7,7 @@ const config = {
     user: process.env.SQL_USER,
     password: process.env.SQL_PASSWORD,
     server: process.env.SQL_SERVER || 'localhost',
-    port: 1434,
+    port: 1435,
     database: process.env.SQL_DATABASE || 'chatty',
     options: {
         encrypt: false,

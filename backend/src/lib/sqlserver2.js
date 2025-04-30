@@ -2,13 +2,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import sql from "mssql";
-const sql1 = sql; // Export sql for use in other files
+const sql2 = sql; // Export sql for use in other files
 
 const config = {
     user: process.env.SQL_USER1,
     password: process.env.SQL_PASSWORD1,
     server: process.env.SQL_SERVER1,
-    port: 1436,
+    port: 1437,
     database: process.env.SQL_DATABASE1,
     options: {
         encrypt: false, // Use this if you're on Windows Azure
@@ -16,14 +16,14 @@ const config = {
     },
 };
 
-const poolPromise1 = new sql.ConnectionPool(config)
+const poolPromise2 = new sql.ConnectionPool(config)
     .connect()
     .then(pool => {
-        console.log(" Kết nối SQL Server1 thành công!");
+        console.log(" Kết nối SQL Server2 thành công!");
         return pool;
     })
     .catch(err => {
-        console.error("Lỗi kết nối SQL Server1:", err);
+        console.error("Lỗi kết nối SQL Server2:", err);
     });
 
-export { sql1, poolPromise1 };
+export { sql2, poolPromise2 };

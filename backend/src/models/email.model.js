@@ -12,7 +12,6 @@ const emailSchema = new mongoose.Schema(
         {
             type: String,
             require: true,
-            unique: true
         },
         server:
         {

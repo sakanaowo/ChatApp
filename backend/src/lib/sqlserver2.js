@@ -8,7 +8,7 @@ const config = {
     user: process.env.SQL_USER1,
     password: process.env.SQL_PASSWORD1,
     server: process.env.SQL_SERVER1,
-    port: 1437,
+    port: 1436,
     database: process.env.SQL_DATABASE1,
     options: {
         encrypt: false, // Use this if you're on Windows Azure

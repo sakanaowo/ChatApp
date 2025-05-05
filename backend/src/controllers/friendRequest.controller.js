@@ -291,5 +291,3 @@ export const listPendingRequests = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
-
-//Lấy tất cả người dùng ở các server

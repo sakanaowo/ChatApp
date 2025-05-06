@@ -45,9 +45,15 @@ export const useAuthStore = create((set, get) => ({
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post("/auth/login", data);
+      const res = await axiosInstance.post("/auth/login", data, {
+        withCredentials: true,
+      });
       set({ authUser: res.data });
       toast.success("Logged in successfully");
+      // ✅ Gọi hàm lấy users và truyền email qua URL params
+      const usersRes = await axiosInstance.get(`/messages/users/${res.data.email}`);
+
+      console.log("Users for sidebar:", usersRes.data);
 
       get().connectSocket();
     } catch (error) {

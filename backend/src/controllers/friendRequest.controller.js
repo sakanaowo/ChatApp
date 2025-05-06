@@ -277,13 +277,28 @@ export const rejectRequest = async (req, res) => {
 // Lấy danh sách lời mời kết bạn chưa xử lý
 export const listPendingRequests = async (req, res) => {
     try {
-        const { serverId, email } = req.user;
+        // 📥 Nhận email từ params (hoặc dùng req.body nếu cần)
+        const { email } = req.body;
 
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        // 🔍 Truy vấn MongoDB để lấy serverId dựa vào email
+        const user = await Email.findOne({ email: email }); // Model MongoDB lưu email & serverId
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const serverId = Number(user.server); // Lấy serverId đã lưu trong MongoDB
+
+        // 🔌 Kết nối SQL theo serverId của user
         const pool = await getSqlPoolByServer(serverId);
 
+        // 🔍 Truy vấn SQL để lấy lời mời kết bạn chưa xử lý
         const result = await pool.request()
             .input("email", sql.VarChar, email)
-            .query(`SELECT * FROM Friend_requests WHERE Friend_email2 = @email`);
+            .query(`SELECT * FROM Friend_requests WHERE Receiver_email = @email`);
 
         res.status(200).json(result.recordset);
     } catch (error) {

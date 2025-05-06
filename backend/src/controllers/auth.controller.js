@@ -9,13 +9,13 @@ import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 export const signup = async (req, res) => {
 
   const { username, email, password } = req.body;
-  const server = 3;
+  const server = 1;
 
   try {
     // Kiểm tra đầu vào
     console.log("Bắt đầu signup:", username, email, password, server);
-    if (!username || !email || !password || !server) {
-      return res.status(400).json({ message: "All fields are required (username, email, password, server)" });
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "All fields are required (username, email, password)" });
     }
 
     if (password.length < 6) {

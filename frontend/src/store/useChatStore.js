@@ -13,7 +13,10 @@ export const useChatStore = create((set, get) => ({
   getUsers: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get("/messages/users");
+      const email = useAuthStore.getState().user?.email;
+      if (!email) throw new Error("Email not found in auth store");
+      // const res = await axiosInstance.get(`/messages/users?email=${email}`);
+      const res = await axiosInstance.get(`/messages/users/${email}`);
       set({ users: res.data });
     } catch (error) {
       toast.error(error.response.data.message);

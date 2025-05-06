@@ -4,40 +4,98 @@ import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
+import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
+import sql from "mssql";
+import Email from "../models/email.model.js";
+
+
+const getFriendsFromServer = async (serverId, email) => {
+    const pool = await getSqlPoolByServer(serverId);
+
+    const friends1 = await pool.request()
+        .input('email', sql.VarChar, email)
+        .query(`SELECT friend_email2 AS friendEmail FROM Friends WHERE friend_email1 = @email`);
+
+    const friends2 = await pool.request()
+        .input('email', sql.VarChar, email)
+        .query(`SELECT friend_email1 AS friendEmail FROM Friends WHERE friend_email2 = @email`);
+
+    return [...friends1.recordset, ...friends2.recordset];
+};
+
 export const getUsersForSidebar = async (req, res) => {
     try {
-        const loggedInUserId = req.user.id;
-        const pool = await poolPromise;
-        const result = await pool.request()
-            .input("userId", sql.Int, loggedInUserId)
-            .query(`
-                SELECT User_id, User_name, Email, ProfilePic 
-                FROM Users 
-                WHERE User_id <> @userId
-            `);
+        const { email } = req.params;
+        // const email = req.body;
 
-        res.status(200).json(result.recordset);
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        let allFriends = [];
+
+        // Giả sử bạn có 3 server (server 1, 2, 3)
+        for (let serverId = 1; serverId <= 3; serverId++) {
+            const friends = await getFriendsFromServer(serverId, email);
+            allFriends = allFriends.concat(friends);
+        }
+
+        //Xử lý trùng lặp bạn bè vì thực hiện lấy data 2 lần email1 = email hoặc email2 = email 
+
+        const uniqueFriendsMap = new Map();
+        allFriends.forEach(f => {
+            uniqueFriendsMap.set(f.friendEmail.toLowerCase(), f);
+        });
+
+        const uniqueFriends = Array.from(uniqueFriendsMap.values());
+
+        res.status(200).json(uniqueFriends);
+
     } catch (error) {
-        console.error("Error in getUsersForSidebar: ", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.log("Error in checkFriends:", error.message);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
+// export const getMessages = async (req, res) => {
+//     try {
+//         const { id: userToChatId } = req.params;
+//         const myId = req.user.id;
+
+//         const messages = await Message.find({
+//             $or: [
+//                 { senderId: myId, receiverId: userToChatId },
+//                 { senderId: userToChatId, receiverId: myId },
+//             ],
+//         });
+
+//         res.status(200).json(messages);
+//     } catch (error) {
+//         console.log("Error in getMessages controller: ", error.message);
+//         res.status(500).json({ error: "Internal server error" });
+//     }
+// };
+
+
 export const getMessages = async (req, res) => {
     try {
-        const { id: userToChatId } = req.params;
-        const myId = req.user.id;
+        const yourEmail = req.query.myEmail;
+        const friendEmail = req.params.email;
+
+        if (!yourEmail || !friendEmail) {
+            return res.status(400).json({ message: "Both sender and receiver email are required" });
+        }
 
         const messages = await Message.find({
             $or: [
-                { senderId: myId, receiverId: userToChatId },
-                { senderId: userToChatId, receiverId: myId },
+                { senderEmail: yourEmail, receiverEmail: friendEmail },
+                { senderEmail: friendEmail, receiverEmail: yourEmail },
             ],
-        });
+        }).sort({ createdAt: 1 }); // Optional: sort by time ascending
 
         res.status(200).json(messages);
     } catch (error) {
-        console.log("Error in getMessages controller: ", error.message);
+        console.log("Error in getMessages controller:", error.message);
         res.status(500).json({ error: "Internal server error" });
     }
 };

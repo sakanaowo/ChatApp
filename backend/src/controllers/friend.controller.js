@@ -22,7 +22,7 @@ const getFriendsFromServer = async (serverId, email) => {
 // Hàm chính: Lấy tất cả bạn bè từ 3 server
 export const checkFriends = async (req, res) => {
     try {
-        const { email } = req.params;
+        const { email } = req.body;
 
         if (!email) {
             return res.status(400).json({ message: "Email is required" });

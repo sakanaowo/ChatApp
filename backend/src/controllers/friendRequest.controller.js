@@ -35,6 +35,7 @@ export const sendRequest = async (req, res) => {
             return res.status(400).json({ message: "You cannot send a friend request to yourself" });
         }
 
+        //Lấy email trên mongoDB
         const fromUser = await Email.findOne({ email: fromEmail });
         const toUser = await Email.findOne({ email: toEmail });
 

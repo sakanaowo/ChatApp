@@ -7,7 +7,9 @@ import Email from "../models/email.model.js";
 import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 
 export const signup = async (req, res) => {
-  const { username, email, password, server } = req.body;
+
+  const { username, email, password } = req.body;
+  const server = 3;
 
   try {
     // Kiểm tra đầu vào

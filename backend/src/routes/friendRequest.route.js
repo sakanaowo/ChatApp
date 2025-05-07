@@ -12,16 +12,16 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 // Gửi lời mời kết bạn
-router.post("/", sendRequest);
+router.post("/", protectRoute, sendRequest);
 
 // Lấy danh sách lời mời kết bạn chưa xử lý
-router.get("/", listPendingRequests);
+router.get("/", protectRoute, listPendingRequests);
 
 // Chấp nhận lời mời kết bạn
 // để như này để test api dễ hơn
-router.put("/accept", acceptRequest);
+router.put("/accept", protectRoute, acceptRequest);
 
 // Từ chối lời mời kết bạn
-router.put("/reject", rejectRequest);
+router.put("/reject", protectRoute, rejectRequest);
 
 export default router;

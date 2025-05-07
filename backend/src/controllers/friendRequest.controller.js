@@ -6,8 +6,10 @@ import Email from "../models/email.model.js";
 
 // Hàm phụ: kiểm tra hai người đã là bạn bè chưa
 const areFriends = async (serverId, email1, email2) => {
+
     const pool = await getSqlPoolByServer(serverId);
 
+    console.log("Pool in areFriends for server:", serverId, pool);
     const result = await pool.request()
         .input('email1', sql.VarChar, email1)
         .input('email2', sql.VarChar, email2)
@@ -23,8 +25,8 @@ const areFriends = async (serverId, email1, email2) => {
 // Hàm gửi lời mời kết bạn (tạm thời bỏ auth bên route để test dễ hơn)
 export const sendRequest = async (req, res) => {
     try {
-        const { fromEmail, toEmail } = req.body;
-
+        const fromEmail = req.user.email;
+        const { toEmail } = req.body;
 
         if (!fromEmail || !toEmail) {
             return res.status(400).json({ message: "Both emails are required" });
@@ -72,6 +74,8 @@ export const sendRequest = async (req, res) => {
         if (serverFrom === serverTo) {
             const pool = await getSqlPoolByServer(serverFrom);
 
+            console.log("Pool (same server):", pool);
+
             const exists = await requestExists(pool, fromEmail, toEmail);
             if (exists) {
                 return res.status(400).json({ message: "Friend request already sent" });
@@ -86,6 +90,9 @@ export const sendRequest = async (req, res) => {
         else {
             const poolFrom = await getSqlPoolByServer(serverFrom);
             const poolTo = await getSqlPoolByServer(serverTo);
+
+            console.log("Pool From (server", serverFrom, "):", poolFrom);
+            console.log("Pool To (server", serverTo, "):", poolTo);
 
             const existsFrom = await requestExists(poolFrom, fromEmail, toEmail);
             const existsTo = await requestExists(poolTo, fromEmail, toEmail);
@@ -120,12 +127,22 @@ export const sendRequest = async (req, res) => {
 // Chấp nhận lời mời kết bạn
 export const acceptRequest = async (req, res) => {
     try {
-        let { serverId, requestId } = req.body;
-        serverId = Number(serverId);
-        if (!requestId || !serverId) {
-            return res.status(400).json({ message: "Request ID and Server ID are required" });
+        //let { serverId, requestId } = req.body;
+
+        const userEmail = req.user.email; // ✅ Email người nhận (Receiver_email)
+        const { requestId } = req.body;
+
+        if (!requestId) {
+            return res.status(400).json({ message: "Server ID are required" });
         }
 
+        // 🔍 Truy MongoDB để lấy serverId người nhận
+        const receiverDoc = await Email.findOne({ email: userEmail });
+        if (!receiverDoc) {
+            return res.status(404).json({ message: "Receiver not found in MongoDB" });
+        }
+
+        const serverId = Number(receiverDoc.server);
         const pool = await getSqlPoolByServer(serverId);
 
         // 1. Lấy thông tin lời mời
@@ -211,17 +228,24 @@ export const acceptRequest = async (req, res) => {
 // Từ chối lời mời kết bạn
 export const rejectRequest = async (req, res) => {
     try {
-        let { serverId, requestId } = req.body;
-        serverId = Number(serverId);
+        const userEmail = req.user.email; // ✅ Lấy email người nhận từ req.user (đã xác thực)
+        const { requestId } = req.body;
 
-        if (!requestId || !serverId) {
-            return res.status(400).json({ message: "Request ID and Server ID are required" });
+        if (!requestId) {
+            return res.status(400).json({ message: "Request ID is required" });
         }
 
-        const poolReceiver = await getSqlPoolByServer(serverId);
+        // 🔍 Truy MongoDB để lấy serverId người nhận
+        const receiverDoc = await Email.findOne({ email: userEmail });
+        if (!receiverDoc) {
+            return res.status(404).json({ message: "Receiver not found in MongoDB" });
+        }
+
+        const serverId = Number(receiverDoc.server);
+        const pool = await getSqlPoolByServer(serverId);
 
         // 1. Lấy thông tin lời mời
-        const requestResult = await poolReceiver.request()
+        const requestResult = await pool.request()
             .input("requestId", sql.Int, requestId)
             .query(`SELECT * FROM Friend_requests WHERE Request_id = @requestId`);
 
@@ -253,7 +277,7 @@ export const rejectRequest = async (req, res) => {
         const serverReceiver = Number(receiver.server);
 
         // 3. Xóa ở server receiver (người nhận)
-        await poolReceiver.request()
+        await pool.request()
             .input("senderEmail", sql.VarChar, Sender_email)
             .input("receiverEmail", sql.VarChar, Receiver_email)
             .query(`DELETE FROM Friend_requests WHERE Sender_email = @senderEmail AND Receiver_email = @receiverEmail`);
@@ -277,8 +301,7 @@ export const rejectRequest = async (req, res) => {
 // Lấy danh sách lời mời kết bạn chưa xử lý
 export const listPendingRequests = async (req, res) => {
     try {
-        // 📥 Nhận email từ params (hoặc dùng req.body nếu cần)
-        const { email } = req.body;
+        const email = req.user.email;
 
         if (!email) {
             return res.status(400).json({ message: "Email is required" });

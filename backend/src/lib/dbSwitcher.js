@@ -3,7 +3,7 @@ import { poolPromise } from "../lib/sqlserver.js";
 import { poolPromise1 } from "../lib/sqlserver1.js";
 import { poolPromise2 } from "../lib/sqlserver2.js";
 
-export function getSqlPoolByServer(serverId) {
+export async function getSqlPoolByServer(serverId) {
     switch (serverId) {
         case 1:
             return poolPromise;

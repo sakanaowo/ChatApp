@@ -9,7 +9,7 @@ import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 export const signup = async (req, res) => {
 
   const { username, email, password } = req.body;
-  const server = 1;
+  const server = 3;
 
   try {
     // Kiểm tra đầu vào
@@ -67,7 +67,7 @@ export const signup = async (req, res) => {
     });
 
     // Tạo JWT
-    generateToken(user.User_id, res);
+    generateToken(user.Email, res);
 
     // Trả về thông tin
     res.status(201).json({
@@ -118,7 +118,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    generateToken(foundUser.user.User_id, res);
+    generateToken(foundUser.user.Email, res);
 
     res.status(200).json({
       id: foundUser.user.User_id,
@@ -145,6 +145,7 @@ export const logout = (req, res) => {
 };
 
 // Cập nhật avatar
+// Tạm thời chưa check hàm này
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;

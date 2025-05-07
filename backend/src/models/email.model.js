@@ -5,12 +5,12 @@ const emailSchema = new mongoose.Schema(
         userid:
         {
             type: String,
-            require: true
+            required: true
         },
         email:
         {
             type: String,
-            require: true,
+            required: true,
             unique: true
         },
         server:

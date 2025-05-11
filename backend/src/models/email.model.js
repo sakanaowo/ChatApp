@@ -15,7 +15,7 @@ const emailSchema = new mongoose.Schema(
         },
         server:
         {
-            type: Number
+            type: String
         }
     }
 );

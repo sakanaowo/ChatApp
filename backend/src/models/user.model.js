@@ -1,18 +1,16 @@
 // Không cần import poolPromise/poolPromise1 nữa
-import { sql as defaultSql } from "../lib/sqlserver.js";
+import sql from "mssql";
 import Email from "./email.model.js";
-import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
-import { sql } from "../lib/sqlserver.js";
-import { sql1 } from "../lib/sqlserver1.js";
-import { sql2 } from "../lib/sqlserver2.js";
+//import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
+import { getSqlPool } from "../lib/dbSwitcher.js";
 
 // Tạo người dùng mới với pool truyền vào
-const createUser = async (username, password, email, pool, sqlInstance = defaultSql) => {
+const createUser = async (username, password, email, pool) => {
     try {
         const result = await pool.request()
-            .input('username', sqlInstance.NVarChar, username)
-            .input('password', sqlInstance.VarChar, password)
-            .input('email', sqlInstance.VarChar, email)
+            .input('username', sql.NVarChar, username)
+            .input('password', sql.VarChar, password)
+            .input('email', sql.VarChar, email)
             .query(`
                 INSERT INTO Users (User_name, Password, Email) 
                 VALUES (@username, @password, @email)
@@ -24,22 +22,36 @@ const createUser = async (username, password, email, pool, sqlInstance = default
 };
 
 // Lấy người dùng theo username với pool truyền vào
-const getUserByUsername = async (username, pool, sqlInstance = defaultSql) => {
+const getUserByUsername = async (username, serverId) => {
     try {
+        const allowedServers = ['server1', 'server2', 'server3'];
+        if (!allowedServers.includes(serverId)) {
+            throw new Error("Invalid server identifier");
+        }
+
+        const pool = await getSqlPool(); // pool kết nối với SQL chính (server1)
+
+        const query = `
+            SELECT * FROM [${serverId}].chatty.dbo.Users 
+            WHERE User_name = @username
+        `;
+
         const result = await pool.request()
-            .input('username', sqlInstance.NVarChar, username)
-            .query(`SELECT * FROM Users WHERE User_name = @username`);
+            .input('username', sql.NVarChar, username)
+            .query(query);
+
         return result.recordset[0];
     } catch (err) {
+        console.error("❌ Error in getUserByUsername:", err.message);
         throw err;
     }
 };
 
 // Lấy user theo ID với pool truyền vào
-const getUserById = async (userId, pool, sqlInstance = defaultSql) => {
+const getUserById = async (userId, pool) => {
     try {
         const result = await pool.request()
-            .input('userId', sqlInstance.Int, userId)
+            .input('userId', sql.Int, userId)
             .query(`SELECT * FROM Users WHERE User_id = @userId`);
         return result.recordset[0];
     } catch (err) {
@@ -47,9 +59,8 @@ const getUserById = async (userId, pool, sqlInstance = defaultSql) => {
     }
 };
 
-
 // Lấy người dùng theo email với pool truyền vào
-const getUserByEmail = async (email, sqlInstance = defaultSql) => {
+const getUserByEmail = async (email) => {
     try {
         // 🔹 1. Lấy serverId từ MongoDB
         const emailDoc = await Email.findOne({ email });
@@ -58,42 +69,35 @@ const getUserByEmail = async (email, sqlInstance = defaultSql) => {
             throw new Error("Email not found or missing server info");
         }
 
-        const serverId = Number(emailDoc.server);
-        if (isNaN(serverId)) {
-            console.error("❌ serverId không hợp lệ:", serverId);
-            throw new Error("Invalid serverId");
-        }
-        console.log(`✅ Email "${email}" thuộc Server ${serverId}`);
+        // 🔹 2. Lấy pool chung
+        // const pool = await getSqlPool();
+        // if (!pool?.request) {
+        //     throw new Error("Invalid pool object");
+        // }
 
-        // 🔹 2. Lấy pool từ serverId
-        const pool = await getSqlPoolByServer(serverId);
+        // // 🔹 3. Truy vấn User từ SQL Server
+        // const result = await pool.request()
+        //     .input('email', sql.VarChar, email)
+        //     .query(`SELECT * FROM Users WHERE Email = @email`);
 
-        // 🟩 Chọn đúng sqlInstance tương ứng
-        let sqlInstance;
-        switch (serverId) {
-            case 1:
-                sqlInstance = sql;
-                break;
-            case 2:
-                sqlInstance = sql1;
-                break;
-            case 3:
-                sqlInstance = sql2;
-                break;
-            default:
-                throw new Error("Invalid server ID");
-        }
+        // if (!result.recordset?.length) {
+        //     throw new Error("User not found");
+        // }
 
-        if (!pool?.request) throw new Error("Invalid pool object");
+        // return result.recordset[0];
 
-        const connection = await pool.connect();
-        const result = await connection.request()
-            .input('email', sqlInstance.VarChar, email)
-            .query(`SELECT * FROM Users WHERE Email = @email`);
+        const serverId = emailDoc.server; // ví dụ: 'server1'
+        const pool = await getSqlPool();
+
+        console.log("server: ", serverId);
+        const result = await pool.request()
+            .input('email', sql.VarChar, email)
+            .query(`SELECT * FROM ${serverId}.chatty.dbo.Users WHERE Email = @email`);
 
         if (!result.recordset?.length) throw new Error("User not found");
 
         return result.recordset[0];
+
     } catch (err) {
         console.error("🔥 Error in getUserByEmail:", err.message);
         throw err;

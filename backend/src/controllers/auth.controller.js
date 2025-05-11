@@ -4,12 +4,13 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
 import Email from "../models/email.model.js";
-import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
+import { getSqlPool } from "../lib/dbSwitcher.js";
+//import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 
 export const signup = async (req, res) => {
 
   const { username, email, password } = req.body;
-  const server = 3;
+  const server = "server3";
 
   try {
     // Kiểm tra đầu vào
@@ -31,15 +32,17 @@ export const signup = async (req, res) => {
     // Kết nối đúng SQL Server
     console.log("Đang lấy pool server:", server);
 
-    const pool = await getSqlPoolByServer(server);
-    if (!pool) {
-      return res.status(500).json({ message: "Invalid server selection" });
-    }
+    // const pool = await getSqlPoolByServer(server);
+    // if (!pool) {
+    //   return res.status(500).json({ message: "Invalid server selection" });
+    // }
+
+    const pool = await getSqlPool();
 
     // Kiểm tra username trong server tương ứng
     console.log("Đang kiểm tra username:", username);
 
-    const existingUser = await getUserByUsername(username, pool);
+    const existingUser = await getUserByUsername(username, server);
     if (existingUser) {
       return res.status(400).json({ message: "Username already exists on this server" });
     }
@@ -51,17 +54,29 @@ export const signup = async (req, res) => {
     // Tạo user trên SQL Server
     console.log("Đang tạo user:", username);
 
-    await createUser(username, hashedPassword, email, pool);
+    // Tạo user trong linked server
+    const insertQuery = `
+      INSERT INTO [${server}].chatty.dbo.Users (User_name, Password, Email)
+      VALUES (@username, @password, @email)
+    `;
+    await pool.request()
+      .input("username", sql.VarChar, username)
+      .input("password", sql.VarChar, hashedPassword)
+      .input("email", sql.VarChar, email)
+      .query(insertQuery);
 
     // Lấy lại user để lấy ID
-    const user = await getUserByUsername(username, pool);
+    const result = await pool.request()
+      .input("email", sql.VarChar, email)
+      .query(`SELECT * FROM [${server}].chatty.dbo.Users WHERE Email = @email`);
+
+    const user = result.recordset[0];
 
     // Lưu email vào MongoDB
     console.log("Đang lưu Email MongoDB:", email);
 
     await Email.create({
       userid: user.User_id.toString(),
-      username,
       email,
       server
     });
@@ -93,39 +108,49 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const servers = [1, 2, 3]; // Các server cần kiểm tra
-    let foundUser = null;
+    // const servers = [1, 2, 3]; // Các server cần kiểm tra
 
-    for (const server of servers) {
-      const pool = await getSqlPoolByServer(server);
-
-      const result = await pool.request()
-        .input("email", sql.VarChar, email)
-        .query(`SELECT * FROM Users WHERE Email = @email`);
-
-      const user = result.recordset[0];
-
-      if (user) {
-        const isPasswordCorrect = await bcrypt.compare(password, user.Password);
-        if (isPasswordCorrect) {
-          foundUser = { user, server };
-          break;
-        }
-      }
+    // 1. Tìm server từ MongoDB
+    const emailRecord = await Email.findOne({ email });
+    if (!emailRecord) {
+      return res.status(400).json({ message: "Email not registered" });
     }
 
-    if (!foundUser) {
+    const server = emailRecord.server;
+    const pool = await getSqlPool();
+
+    console.log(server);
+    const linkedServer = `${server}`; // ví dụ: server2
+    const query = `
+      SELECT * FROM [${linkedServer}].chatty.dbo.Users 
+      WHERE Email = @email
+    `;
+
+    const result = await pool.request()
+      .input("email", sql.VarChar, email)
+      .query(query);
+
+    const user = result.recordset[0];
+    if (!user) {
+      return res.status(400).json({ message: "User not found in SQL Server" });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.Password);
+    if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    generateToken(foundUser.user.Email, res);
+    // 3. Tạo token và trả kết quả
+    generateToken(user.Email, res);
 
     res.status(200).json({
-      id: foundUser.user.User_id,
-      username: foundUser.user.User_name,
-      email: foundUser.user.Email,
-      profilePic: foundUser.user.ProfilePic || null
+      id: user.User_id,
+      username: user.User_name,
+      email: user.Email,
+      server,
+      profilePic: user.ProfilePic || null
     });
+
 
   } catch (error) {
     console.log("Error in login controller:", error.message);

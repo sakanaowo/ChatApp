@@ -1,5 +1,5 @@
 import Email from "../models/email.model.js";
-import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
+//import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 
 // Kiểm tra xem email đã tồn tại chưa
 export const checkEmail = async (req, res) => {

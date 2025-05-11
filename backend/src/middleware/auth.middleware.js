@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { getUserByEmail } from "../models/user.model.js";
 import Email from "../models/email.model.js"; // Import model MongoDB
-import { getSqlPoolByServer } from "../lib/dbSwitcher.js"; // Hàm để lấy pool theo server
+//import { getSqlPoolByServer } from "../lib/dbSwitcher.js"; // Hàm để lấy pool theo server
+import { getSqlPool } from "../lib/dbSwitcher.js";
 
 export const protectRoute = async (req, res, next) => {
     try {
@@ -25,9 +26,9 @@ export const protectRoute = async (req, res, next) => {
         const serverId = emailDoc.server;
         console.log(`✅ Email "${decoded.email}" thuộc Server ${serverId}`);
 
-        // ✅ Lấy pool tương ứng
-        const pool = await getSqlPoolByServer(serverId);
-        console.log(`🔍 Truy vấn User từ SQL Server ${serverId}...`);
+        // Lấy pool kết nối đến SQL Server (dùng pool chung)
+        const pool = await getSqlPool();
+        console.log(`🔍 Truy vấn User từ SQL Server...`);
 
         const user = await getUserByEmail(decoded.email, pool);
         console.log('User from DB:', user); // In log user tìm từ DB

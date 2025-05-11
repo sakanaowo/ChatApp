@@ -1,6 +1,6 @@
 // src/controllers/friend.controller.js
 
-import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
+//import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 import sql from "mssql";
 import Email from "../models/email.model.js";
 
@@ -22,7 +22,7 @@ const getFriendsFromServer = async (serverId, email) => {
 // Hàm chính: Lấy tất cả bạn bè từ 3 server
 export const checkFriends = async (req, res) => {
     try {
-        const { email } = req.body;
+        const email = req.user.email;
 
         if (!email) {
             return res.status(400).json({ message: "Email is required" });

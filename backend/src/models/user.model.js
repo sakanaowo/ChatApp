@@ -69,23 +69,6 @@ const getUserByEmail = async (email) => {
             throw new Error("Email not found or missing server info");
         }
 
-        // 🔹 2. Lấy pool chung
-        // const pool = await getSqlPool();
-        // if (!pool?.request) {
-        //     throw new Error("Invalid pool object");
-        // }
-
-        // // 🔹 3. Truy vấn User từ SQL Server
-        // const result = await pool.request()
-        //     .input('email', sql.VarChar, email)
-        //     .query(`SELECT * FROM Users WHERE Email = @email`);
-
-        // if (!result.recordset?.length) {
-        //     throw new Error("User not found");
-        // }
-
-        // return result.recordset[0];
-
         const serverId = emailDoc.server; // ví dụ: 'server1'
         const pool = await getSqlPool();
 

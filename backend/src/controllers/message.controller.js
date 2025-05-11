@@ -1,113 +1,47 @@
 import { getUserById, getUserByUsername } from "../models/user.model.js";
 import Message from "../models/message.model.js";
-
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
-
 import { getSqlPool } from "../lib/dbSwitcher.js";
 //import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 import sql from "mssql";
 import Email from "../models/email.model.js";
 
-// const getFriendsFromServer = async (serverId, email) => {
-//     const pool = await getSqlPoolByServer(serverId);
-
-//     const friends1 = await pool.request()
-//         .input('email', sql.VarChar, email)
-//         .query(`SELECT friend_email2 AS friendEmail FROM Friends WHERE friend_email1 = @email`);
-
-//     const friends2 = await pool.request()
-//         .input('email', sql.VarChar, email)
-//         .query(`SELECT friend_email1 AS friendEmail FROM Friends WHERE friend_email2 = @email`);
-
-//     return [...friends1.recordset, ...friends2.recordset];
-// };
-
-// const getUserInfoFromServer = async (serverId, email) => {
-//     const pool = await getSqlPoolByServer(serverId);
-
-//     const result = await pool.request()
-//         .input('email', sql.VarChar, email)
-//         .query(`SELECT Email, User_name FROM Users WHERE Email = @email`);
-
-//     return result.recordset[0] || null;
-// };
-
-const getFriendsViaSP = async (sourceServer, email) => {
-    const pool = await getSqlPool();
-
-    const result = await pool.request()
-        .input("Email", sql.VarChar(100), email)
-        .input("SourceServer", sql.VarChar(100), sourceServer) // tên linked server (VD: 'LOCAL1', 'LOCAL2', ...)
-        .execute("sp_GetAllFriendsByEmail");
-
-    return result.recordset; // danh sách bạn bè với user_id, username, email, added_at
-};
-
 export const getUsersForSidebar = async (req, res) => {
     try {
         const email = req.user.email;
-        // const email = req.body;
 
         if (!email) {
             return res.status(400).json({ message: "Email is required" });
         }
 
-        // let allFriends = [];
+        // Truy vấn MongoDB để tìm server người dùng
+        const userDoc = await Email.findOne({ email });
+        if (!userDoc || !userDoc.server) {
+            return res.status(404).json({ message: "User not found or missing server info in MongoDB" });
+        }
 
-        // // Giả sử bạn có 3 server (server 1, 2, 3)
-        // for (let serverId = 1; serverId <= 3; serverId++) {
-        //     const friends = await getFriendsFromServer(serverId, email);
-        //     // Gắn serverId vào từng bạn bè
-        //     const friendsWithServerId = friends.map(f => ({
-        //         ...f,
-        //         serverId
-        //     }));
+        const sourceServer = userDoc.server; // Ex: "LOCAL1", "LOCAL2", ...
 
-        //     allFriends = allFriends.concat(friendsWithServerId);
-        // }
+        const pool = await getSqlPool(); // server trung tâm (server1)
 
-        // //Xử lý trùng lặp bạn bè vì thực hiện lấy data 2 lần email1 = email hoặc email2 = email 
-
-        // const uniqueFriendsMap = new Map();
-        // allFriends.forEach(f => {
-        //     uniqueFriendsMap.set(f.friendEmail.toLowerCase(), f);
-        // });
-
-        // const uniqueFriends = Array.from(uniqueFriendsMap.values());
-
-        // // Lấy chi tiết từng bạn từ SQL Server tương ứng
-        // const detailedFriends = await Promise.all(
-        //     uniqueFriends.map(async friend => {
-        //         const userInfo = await getUserInfoFromServer(friend.serverId, friend.friendEmail);
-        //         if (!userInfo) return null;
-
-        //         return {
-        //             email: userInfo.Email,
-        //             username: userInfo.User_name,
-        //             serverId: friend.serverId
-        //         };
-        //     })
-        // );
-
-
-        const pool = await getSqlPool(); // chỉ dùng LOCAL1
+        // Gọi procedure để lấy danh sách bạn bè
         const result = await pool.request()
             .input("Email", sql.VarChar(100), email)
-            .input("SourceServer", sql.VarChar(100), "LOCAL1") // hardcoded hoặc từ DB nếu cần động
+            .input("SourceServer", sql.VarChar(100), sourceServer)
             .execute("sp_GetAllFriendsByEmail");
 
         const friends = result.recordset.map(friend => ({
             email: friend.Email,
             username: friend.User_name,
-            serverId: "LOCAL1" // bạn có thể gắn nếu muốn
+            addedAt: friend.Added_at,
+            serverId: sourceServer // gắn server người dùng hiện tại nếu cần
         }));
 
         res.status(200).json(friends);
-        //res.status(200).json(detailedFriends.filter(Boolean));
 
     } catch (error) {
-        console.log("Error in checkFriends:", error.message);
+        console.error("Error in getUsersForSidebar:", error.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

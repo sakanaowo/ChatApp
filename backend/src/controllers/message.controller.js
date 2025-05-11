@@ -7,44 +7,6 @@ import { getSqlPool } from "../lib/dbSwitcher.js";
 import sql from "mssql";
 import Email from "../models/email.model.js";
 
-export const getUsersForSidebar = async (req, res) => {
-    try {
-        const email = req.user.email;
-
-        if (!email) {
-            return res.status(400).json({ message: "Email is required" });
-        }
-
-        // Truy vấn MongoDB để tìm server người dùng
-        const userDoc = await Email.findOne({ email });
-        if (!userDoc || !userDoc.server) {
-            return res.status(404).json({ message: "User not found or missing server info in MongoDB" });
-        }
-
-        const sourceServer = userDoc.server; // Ex: "LOCAL1", "LOCAL2", ...
-
-        const pool = await getSqlPool(); // server trung tâm (server1)
-
-        // Gọi procedure để lấy danh sách bạn bè
-        const result = await pool.request()
-            .input("Email", sql.VarChar(100), email)
-            .input("SourceServer", sql.VarChar(100), sourceServer)
-            .execute("sp_GetAllFriendsByEmail");
-
-        const friends = result.recordset.map(friend => ({
-            email: friend.Email,
-            username: friend.User_name,
-            addedAt: friend.Added_at,
-            serverId: sourceServer // gắn server người dùng hiện tại nếu cần
-        }));
-
-        res.status(200).json(friends);
-
-    } catch (error) {
-        console.error("Error in getUsersForSidebar:", error.message);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-};
 
 // export const getMessages = async (req, res) => {
 //     try {

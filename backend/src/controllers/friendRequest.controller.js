@@ -146,72 +146,44 @@ export const acceptRequest = async (req, res) => {
 // Từ chối lời mời kết bạn
 export const rejectRequest = async (req, res) => {
     try {
-        const userEmail = req.user.email; // ✅ Lấy email người nhận từ req.user (đã xác thực)
-        const { requestId } = req.body;
+        const receiverEmail = req.user.email;
+        const { senderEmail } = req.body;
 
-        if (!requestId) {
-            return res.status(400).json({ message: "Request ID is required" });
+        if (!senderEmail) {
+            return res.status(400).json({ message: "Sender email is required" });
         }
 
-        // 🔍 Truy MongoDB để lấy serverId người nhận
-        const receiverDoc = await Email.findOne({ email: userEmail });
-        if (!receiverDoc) {
-            return res.status(404).json({ message: "Receiver not found in MongoDB" });
-        }
-
-        const serverId = Number(receiverDoc.server);
-        const pool = await getSqlPoolByServer(serverId);
-
-        // 1. Lấy thông tin lời mời
-        const requestResult = await pool.request()
-            .input("requestId", sql.Int, requestId)
-            .query(`SELECT * FROM Friend_requests WHERE Request_id = @requestId`);
-
-        const request = requestResult.recordset[0];
-
-        if (!request) {
-            return res.status(404).json({ message: "Friend request not found" });
-        }
-
-        const { Sender_email, Receiver_email } = request;
-
-        // 2. Lấy thông tin user
+        // Tìm server ID của cả hai từ MongoDB
         const users = await Email.find({
-            email: { $in: [Sender_email, Receiver_email] }
+            email: { $in: [senderEmail, receiverEmail] }
         }).select("email server");
 
         if (users.length !== 2) {
-            return res.status(400).json({ message: "User info missing in MongoDB" });
+            return res.status(400).json({ message: "Cannot find both users in MongoDB" });
         }
 
-        const sender = users.find(u => u.email === Sender_email);
-        const receiver = users.find(u => u.email === Receiver_email);
+        const sender = users.find(u => u.email === senderEmail);
+        const receiver = users.find(u => u.email === receiverEmail);
 
         if (!sender || !receiver) {
             return res.status(400).json({ message: "Could not find users by email" });
         }
 
-        const serverSender = Number(sender.server);
-        const serverReceiver = Number(receiver.server);
+        const sourceServer = sender.server;
+        const targetServer = receiver.server;
 
-        // 3. Xóa ở server receiver (người nhận)
+        // Gọi procedure để xóa lời mời trên cả 2 server
+        const pool = await getSqlPool(); // Chỉ cần gọi từ 1 server bất kỳ
         await pool.request()
-            .input("senderEmail", sql.VarChar, Sender_email)
-            .input("receiverEmail", sql.VarChar, Receiver_email)
-            .query(`DELETE FROM Friend_requests WHERE Sender_email = @senderEmail AND Receiver_email = @receiverEmail`);
-
-        // 4. Nếu khác server, xóa ở server sender
-        if (serverSender !== serverReceiver) {
-            const poolSender = await getSqlPoolByServer(serverSender);
-            await poolSender.request()
-                .input("senderEmail", sql.VarChar, Sender_email)
-                .input("receiverEmail", sql.VarChar, Receiver_email)
-                .query(`DELETE FROM Friend_requests WHERE Sender_email = @senderEmail AND Receiver_email = @receiverEmail`);
-        }
+            .input("SenderEmail", sql.VarChar(100), senderEmail)
+            .input("ReceiverEmail", sql.VarChar(100), receiverEmail)
+            .input("SourceServer", sql.VarChar(100), sourceServer)
+            .input("TargetServer", sql.VarChar(100), targetServer)
+            .execute("DeleteFriendRequest");
 
         res.status(200).json({ message: "Friend request rejected successfully" });
     } catch (error) {
-        console.log("Error in rejectRequest:", error.message);
+        console.error("Error in rejectRequest:", error.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

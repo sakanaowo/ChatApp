@@ -9,7 +9,7 @@ const router = express.Router();
 
 // router.post("/send/:id", protectRoute, sendMessage);
 
-router.get("/chat", protectRoute, getMessages);
+router.get("/chat/:email", protectRoute, getMessages);
 
 router.post("/send/:email", protectRoute, sendMessage);
 

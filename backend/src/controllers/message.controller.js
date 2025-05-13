@@ -30,17 +30,17 @@ import Email from "../models/email.model.js";
 
 export const getMessages = async (req, res) => {
     try {
-        const yourEmail = req.query.myEmail;
-        const friendEmail = req.params.email;
+        const senderEmail = req.user.email;
+        const receiverEmail = req.params.email;
 
-        if (!yourEmail || !friendEmail) {
+        if (!senderEmail || !receiverEmail) {
             return res.status(400).json({ message: "Both sender and receiver email are required" });
         }
 
         const messages = await Message.find({
             $or: [
-                { senderEmail: yourEmail, receiverEmail: friendEmail },
-                { senderEmail: friendEmail, receiverEmail: yourEmail },
+                { senderEmail: senderEmail, receiverEmail: receiverEmail },
+                { senderEmail: receiverEmail, receiverEmail: senderEmail },
             ],
         }).sort({ createdAt: 1 }); // Optional: sort by time ascending
 

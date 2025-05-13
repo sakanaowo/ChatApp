@@ -11,6 +11,6 @@ const router = express.Router();
 
 router.get("/chat", protectRoute, getMessages);
 
-router.post("/send", protectRoute, sendMessage);
+router.post("/send/:email", protectRoute, sendMessage);
 
 export default router;

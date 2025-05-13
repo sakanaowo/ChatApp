@@ -1,7 +1,7 @@
 import { getUserById, getUserByUsername } from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
+import { getReceiverSocketEmail, io } from "../lib/socket.js";
 import { getSqlPool } from "../lib/dbSwitcher.js";
 //import { getSqlPoolByServer } from "../lib/dbSwitcher.js";
 import sql from "mssql";
@@ -54,7 +54,7 @@ export const getMessages = async (req, res) => {
 export const sendMessage = async (req, res) => {
     try {
         const { text, image } = req.body;
-        const email = req.params;
+        const receiverEmail = req.params.email;
         const senderEmail = req.user.email;
 
         let imageUrl;
@@ -74,7 +74,7 @@ export const sendMessage = async (req, res) => {
         await newMessage.save();
 
         //update later
-        const receiverSocketId = getReceiverSocketId(receiverId);
+        const receiverSocketId = getReceiverSocketEmail(receiverEmail);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("newMessage", newMessage);
         }

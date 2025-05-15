@@ -2,13 +2,15 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
     {
-        senderId: {
-            type: mongoose.Schema.Types.ObjectId,
+        senderEmail: {
+            //type: mongoose.Schema.Types.ObjectId,
+            type: String,
             ref: 'User',
             required: true
         },
-        receiverId: {
-            type: mongoose.Schema.Types.ObjectId,
+        receiverEmail: {
+            //type: mongoose.Schema.Types.ObjectId,
+            type: String,
             ref: 'User',
             required: true
         },

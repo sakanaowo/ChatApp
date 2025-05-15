@@ -45,7 +45,9 @@ export const useAuthStore = create((set, get) => ({
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post("/auth/login", data);
+      const res = await axiosInstance.post("/auth/login", data, {
+        withCredentials: true,
+      });
       set({ authUser: res.data });
       toast.success("Logged in successfully");
 
@@ -88,15 +90,17 @@ export const useAuthStore = create((set, get) => ({
 
     const socket = io(BASE_URL, {
       query: {
-        userId: authUser._id,
+        // userId: authUser._id,
+        userEmail: authUser.email,
       },
     });
     socket.connect();
 
     set({ socket: socket });
 
-    socket.on("getOnlineUsers", (userIds) => {
-      set({ onlineUsers: userIds });
+    socket.on("getOnlineUsers", (userEmails) => {
+      // set({ onlineUsers: userIds });
+      set({ onlineUsers: userEmails });
     });
   },
   disconnectSocket: () => {

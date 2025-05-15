@@ -13,7 +13,7 @@ export const useChatStore = create((set, get) => ({
   getUsers: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get("/messages/users");
+      const res = await axiosInstance.get(`/friends`);
       set({ users: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
@@ -22,10 +22,24 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  getMessages: async (userId) => {
+  // getAllUsers: async () => {
+  //   set({ isUsersLoading: true });
+  //   try {
+  //     const res = await axiosInstance.get("/email/getAllUsers");
+  //     set({ users: res.data });
+  //     console.log(res.data);
+  //   } catch (error) {
+  //     console.error("getAllUsers error:", error);
+  //     toast.error(error?.response?.data?.message || "Lỗi lấy danh sách người dùng");
+  //   } finally {
+  //     set({ isUsersLoading: false });
+  //   }
+  // },
+
+  getMessages: async (Email) => {
     set({ isMessagesLoading: true });
     try {
-      const res = await axiosInstance.get(`/messages/${userId}`);
+      const res = await axiosInstance.get(`/messages/chat/${Email}`);
       set({ messages: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
@@ -36,7 +50,7 @@ export const useChatStore = create((set, get) => ({
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
     try {
-      const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
+      const res = await axiosInstance.post(`/messages/send/${selectedUser.email}`, messageData);
       set({ messages: [...messages, res.data] });
     } catch (error) {
       toast.error(error.response.data.message);
@@ -50,7 +64,9 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+      // const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+
+      const isMessageSentFromSelectedUser = newMessage.senderEmail === selectedUser.email;
       if (!isMessageSentFromSelectedUser) return;
 
       set({

@@ -19,12 +19,9 @@ const Sidebar = () => {
     getUsers();
   }, [getUsers]);
 
-  // const filteredUsers = showOnlineOnly
-  //   ? users.filter((user) => onlineUsers.includes(user._id))
-  //   : users;
   const filteredUsers = users.filter((user) => {
     const isOnline = onlineUsers.includes(user._id);
-    const matchesSearch = user.fullName
+    const matchesSearch = user.username
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     return (!showOnlineOnly || isOnline) && matchesSearch;
@@ -38,7 +35,7 @@ const Sidebar = () => {
         <div className="flex items-center gap-2">
           <Users className="size-6" />
           <span className="font-medium hidden lg:block">Contacts</span>
-          {/* Search  */}
+          {/* Search  bar*/}
           <div className="relative h-10 w-10 focus-within:w-64 transition-all duration-300 border border-gray-300 rounded-full px-3">
             <span className="absolute left-3 top-1/2 -translate-y-1/2">
               <img
@@ -78,7 +75,7 @@ const Sidebar = () => {
       <div className="overflow-y-auto w-full py-3">
         {filteredUsers.map((user) => (
           <button
-            key={user._id}
+            key={user.email}
             onClick={() => {
               setSelectedUser(user);
               setSearchTerm("");
@@ -96,7 +93,7 @@ const Sidebar = () => {
             <div className="relative mx-auto lg:mx-0">
               <img
                 src={user.profilePic || "/avatar.png"}
-                alt={user.name}
+                alt={user.username}
                 className="size-12 object-cover rounded-full"
               />
               {onlineUsers.includes(user._id) && (
@@ -109,7 +106,7 @@ const Sidebar = () => {
 
             {/* User info - only visible on larger screens */}
             <div className="hidden lg:block text-left min-w-0">
-              <div className="font-medium truncate">{user.fullName}</div>
+              <div className="font-medium truncate">{user.username}</div>
               <div className="text-sm text-zinc-400">
                 {onlineUsers.includes(user._id) ? "Online" : "Offline"}
               </div>
@@ -121,6 +118,7 @@ const Sidebar = () => {
           <div className="text-center text-zinc-500 py-4">No online users</div>
         )}
       </div>
+      {/* to suggestion button */}
       <NavToSuggestions />
     </aside>
   );

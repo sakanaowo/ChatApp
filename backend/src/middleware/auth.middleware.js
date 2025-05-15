@@ -7,7 +7,8 @@ import { getSqlPool } from "../lib/dbSwitcher.js";
 export const protectRoute = async (req, res, next) => {
     try {
         const token = req.cookies.jwt;
-        console.log('Cookies:', req.cookies); // In log cookie
+        // console.log('Cookies:', req.cookies); // In log cookie
+        console.log('Cookies:', token); // In log cookie
         if (!token) {
             return res.status(401).json({ message: "You need to be logged in" });
         }

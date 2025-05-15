@@ -23,6 +23,7 @@ export const checkEmail = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
+        const email = req.user.email?.toLowerCase();
         const pool = await getSqlPool();
 
         // Gộp toàn bộ user từ 3 server bằng UNION ALL
@@ -33,8 +34,11 @@ export const getAllUsers = async (req, res) => {
       UNION ALL
       SELECT User_id, User_name, Email, 'server3' AS server FROM [server3].chatty.dbo.Users
     `);
+        const users = result.recordset.filter(
+            (user) => user.Email?.toLowerCase() !== email
+        );
 
-        res.status(200).json(result.recordset);
+        res.status(200).json(users);
     } catch (error) {
         console.error("Error in getAllUsers:", error.message);
         res.status(500).json({ message: "Internal Server Error" });

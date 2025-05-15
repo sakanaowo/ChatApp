@@ -54,7 +54,7 @@ export const sendRequest = async (req, res) => {
         // Lấy thông tin từ MongoDB
         const fromUser = await Email.findOne({ email: fromEmail });
         const toUser = await Email.findOne({ email: toEmail });
-
+        0
         if (!fromUser || !toUser) {
             return res.status(404).json({ message: "User(s) not found" });
         }
@@ -111,9 +111,9 @@ export const acceptRequest = async (req, res) => {
         // Lấy server 2 người từ MongoDB
         const users = await Email.find({ email: { $in: [senderEmail, receiverEmail] } }).select("email server");
 
-        if (users.length !== 2) {
-            return res.status(400).json({ message: "Missing user server info in MongoDB" });
-        }
+        // if (users.length !== 2) {
+        //     return res.status(400).json({ message: "Missing user server info in MongoDB" });
+        // }
 
         const sender = users.find(u => u.email === senderEmail);
         const receiver = users.find(u => u.email === receiverEmail);
@@ -221,3 +221,36 @@ export const listPendingRequests = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+export const listSendedRequests = async (req, res) => {
+    try {
+        const email = req.user.email;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        // 🔍 Truy MongoDB để lấy server người dùng
+        const user = await Email.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found in MongoDB" });
+        }
+
+        const serverName = user.server;
+        const pool = await getSqlPool(); // luôn dùng 1 pool cố định
+
+        // 🔍 Lấy các lời mời kết bạn mà user này là người gửi
+        const result = await pool.request()
+            .input("email", sql.VarChar, email)
+            .query(`
+                SELECT * 
+                FROM [${serverName}].chatty.dbo.Friend_requests 
+                WHERE Sender_email = @email AND Status = 'pending'
+            `);
+
+        res.status(200).json(result.recordset);
+    } catch (error) {
+        console.error("Error in listSendedRequests:", error.message);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}

@@ -8,6 +8,8 @@ const router = express.Router();
 router.get("/check/:email", checkEmail);
 
 // Lấy tất cả người dùng ở các server
+// router.get("/getAllUsers", protectRoute, getAllUsers);
+
 router.get("/getAllUsers", protectRoute, getAllUsers);
 
 export default router;

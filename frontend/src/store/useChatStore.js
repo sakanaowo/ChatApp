@@ -13,10 +13,7 @@ export const useChatStore = create((set, get) => ({
   getUsers: async () => {
     set({ isUsersLoading: true });
     try {
-      const email = useAuthStore.getState().user?.email;
-      if (!email) throw new Error("Email not found in auth store");
-      // const res = await axiosInstance.get(`/messages/users?email=${email}`);
-      const res = await axiosInstance.get(`/messages/users/${email}`);
+      const res = await axiosInstance.get(`/friends`);
       set({ users: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
@@ -25,10 +22,24 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  // getAllUsers: async () => {
+  //   set({ isUsersLoading: true });
+  //   try {
+  //     const res = await axiosInstance.get("/email/getAllUsers");
+  //     set({ users: res.data });
+  //     console.log(res.data);
+  //   } catch (error) {
+  //     console.error("getAllUsers error:", error);
+  //     toast.error(error?.response?.data?.message || "Lỗi lấy danh sách người dùng");
+  //   } finally {
+  //     set({ isUsersLoading: false });
+  //   }
+  // },
+
   getMessages: async (Email) => {
     set({ isMessagesLoading: true });
     try {
-      const res = await axiosInstance.get(`/messages/${Email}`);
+      const res = await axiosInstance.get(`/messages/chat/${Email}`);
       set({ messages: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
@@ -53,7 +64,9 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+      // const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+
+      const isMessageSentFromSelectedUser = newMessage.senderEmail === selectedUser.email;
       if (!isMessageSentFromSelectedUser) return;
 
       set({

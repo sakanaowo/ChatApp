@@ -36,11 +36,40 @@ io.on("connection", (socket) => {
   // io.emit() is used to send events to all the connected clients
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
+  // socket.on("sendFriendRequest", ({
+  //   senderEmail,
+  //   receiverEmail
+  // }) => {
+  //   console.log("send friend request from:", senderEmail, " to ", receiverEmail);
+  //   const receiverSocketId = getReceiverSocketEmail(receiverEmail);
+  //   if (receiverSocketId) {
+  //     io.to(receiverSocketId).emit("receiveFriendRequest", {
+  //       senderEmail,
+  //       receiverEmail
+  //     });
+  //   }
+  // });
+  // socket.on("acceptFriendRequest", ({
+  //   senderEmail,
+  //   receiverEmail
+  // }) => {
+  //   console.log("accept friend request from:", senderEmail, " to ", receiverEmail);
+  //   const senderSocketId = getReceiverSocketEmail(senderEmail);
+  //   if (senderSocketId) {
+  //     io.to(senderSocketId).emit("acceptFriendRequest", {
+  //       senderEmail,
+  //       receiverEmail
+  //     });
+  //   }
+  // });
+
+
   socket.on("disconnect", () => {
-    console.log("A user disconnected", socket.id);
+    console.log("An user disconnected", socket.id);
     delete userSocketMap[userEmail];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
+
 
 export { io, app, server };

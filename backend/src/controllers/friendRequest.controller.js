@@ -4,6 +4,7 @@
 import sql from "mssql";
 import Email from "../models/email.model.js";
 import { getSqlPool } from "../lib/dbSwitcher.js";
+import { getReceiverSocketEmail, io } from "../lib/socket.js";
 
 // Hàm phụ: kiểm tra hai người đã là bạn bè chưa
 const areFriends = async (email1, email2) => {
@@ -91,6 +92,15 @@ export const sendRequest = async (req, res) => {
             .input('TargetServer', sql.VarChar, serverTo)
             .execute('SendFriendRequest');
 
+        // Gửi thông báo đến người nhận qua socket.io
+        const receiverSocketId = getReceiverSocketEmail(toEmail);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("receiveFriendRequest", {
+                senderEmail: fromEmail,
+                receiverEmail: toEmail
+            });
+        }
+
         res.status(200).json({ message: "Friend request sent successfully" });
     } catch (error) {
         console.log("Error in sendRequest:", error.message);
@@ -134,6 +144,15 @@ export const acceptRequest = async (req, res) => {
             .input("SourceServer", sql.VarChar, sourceServer)
             .input("TargetServer", sql.VarChar, targetServer)
             .execute("AcceptFriendRequest");
+
+        // Gửi thông báo đến người gửi lời mời qua socket.io
+        const senderSocketId = getReceiverSocketEmail(senderEmail);
+        if (senderSocketId) {
+            io.to(senderSocketId).emit("acceptFriendRequest", {
+                senderEmail: receiverEmail,
+                receiverEmail: senderEmail
+            });
+        }
 
         res.status(200).json({ message: "Friend request accepted successfully" });
 

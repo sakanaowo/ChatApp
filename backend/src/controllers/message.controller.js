@@ -59,11 +59,6 @@ export const sendMessage = async (req, res) => {
             io.to(receiverSocketId).emit("newMessage", newMessage);
         }
 
-        // const receiverSocketEmail = getReceiverSocketId(receiverEmail);
-        // if (receiverSocketEmail) {
-        //     io.to(receiverSocketEmail).emit("newMessage", newMessage);
-        // }
-
         res.status(201).json(newMessage);
     } catch (error) {
         console.log("Error in sendMessage controller: ", error.message);

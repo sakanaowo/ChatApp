@@ -90,7 +90,6 @@ export const useAuthStore = create((set, get) => ({
 
     const socket = io(BASE_URL, {
       query: {
-        // userId: authUser._id,
         userEmail: authUser.email,
       },
     });

@@ -1,6 +1,6 @@
 const UserCard = ({ user, isPending, onAddFriend }) => {
   return (
-    <div className="p-4 border rounded-lg shadow hover:shadow-lg transition flex flex-col items-center bg-white">
+    <div className="p-4 border rounded-lg shadow hover:shadow-lg transition flex flex-col items-center bg-base-100">
       {/* Avatar */}
       <img
         src={user.profilePic || "/avatar.png"}

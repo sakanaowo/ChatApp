@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
+import { useAuthStore } from "./useAuthStore";
 
 export const useOtherUserStore = create((set, get) => ({
     users: [],
@@ -42,7 +43,7 @@ export const useOtherUserStore = create((set, get) => ({
             set((state) => ({
                 pendingRequests: [...state.pendingRequests, { Sender_email: toEmail }],
             }));
-
+            get().connectSocket();
             get().getFriendRequests();
             get().getAllUsers();
             get().getAllFriends();
@@ -64,6 +65,7 @@ export const useOtherUserStore = create((set, get) => ({
                 ),
             }));
 
+            get().connectSocket();
             get().getFriendRequests();
             get().getAllFriends();
             get().getAllUsers();
@@ -113,5 +115,33 @@ export const useOtherUserStore = create((set, get) => ({
         } catch (error) {
             toast.error("Failed to reject friend request: " + error);
         }
-    }
+    },
+
+    connectSocket: () => {
+        const { getState } = useAuthStore;
+        const { socket } = getState();
+        if (!socket) return;
+
+        socket.off("receiveFriendRequest");
+        socket.off("acceptFriendRequest");
+
+        socket.on("receiveFriendRequest", () => {
+            get().getFriendRequests();
+            get().getPendingRequests();
+        });
+
+        socket.on("acceptFriendRequest", () => {
+            get().getFriendRequests();
+            get().getPendingRequests();
+            get().getAllFriends();
+        });
+    },
+    disconnectSocket: () => {
+        const { getState } = useAuthStore;
+        const { socket } = getState();
+        if (!socket) return;
+
+        socket.off("receiveFriendRequest");
+        socket.off("acceptFriendRequest");
+    },
 }))

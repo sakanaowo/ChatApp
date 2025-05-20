@@ -27,6 +27,8 @@ app.use(cors({
   credentials: true
 }));// allow to make request from frontend to backend
 
+
+
 app.use("/api/auth", appRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/email", emailRoutes);

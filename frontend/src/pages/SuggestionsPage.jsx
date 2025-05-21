@@ -27,6 +27,17 @@ const SuggestionsPage = () => {
     getFriendRequests();
     getAllFriends();
     getPendingRequests();
+
+    const interval = setInterval(() => {
+      getAllUsers();
+      getFriendRequests();
+      getAllFriends();
+      getPendingRequests();
+    }, 2000);
+    return () => {
+      clearInterval(interval);
+    };
+    //
   }, [getAllUsers, getFriendRequests, getAllFriends, getPendingRequests]);
 
   const otherUsers = users.filter((user) => {

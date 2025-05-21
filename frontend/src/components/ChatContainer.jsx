@@ -24,7 +24,14 @@ const ChatContainer = () => {
 
     subscribeToMessages();
 
-    return () => unsubscribeFromMessages();
+    const interval = setInterval(() => {
+      getMessages(selectedUser.email);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      unsubscribeFromMessages();
+    };
   }, [
     selectedUser.email,
     getMessages,
@@ -36,6 +43,7 @@ const ChatContainer = () => {
     if (messageEndRef.current && messages) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+    //
   }, [messages]);
 
   if (isMessagesLoading) {
